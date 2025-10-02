@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>r00t payload</title>
+    <style>
+        body { 
+            margin: 0; 
+            font-family: Arial; 
+            background: #000; 
+            color: #fff;
+            overflow: hidden;
+        }
+        .loader {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .content {
+            opacity: 0;
+            transition: opacity 2s;
+            padding: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="loader" id="loader">
+        <h1>Loading...</h1>
+    </div>
+    
+    <div class="content" id="content">
+        <h1>r00t website exploit</h1>
+        <p>testing the payload @r00tteam</p>
+      
+    </div>
+
+    <script>
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('content').style.opacity = '1';
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
