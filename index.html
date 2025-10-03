@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Discord-Priv8</title>
+    <title>Discord-Style Chat</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
     <style>
         :root {
             --discord-dark: #36393f;
@@ -55,6 +54,43 @@
             width: 480px;
             max-width: 90%;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .connection-options {
+            margin-top: 20px;
+            border-top: 1px solid var(--discord-darkest);
+            padding-top: 20px;
+        }
+        
+        .option-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .option-btn {
+            flex: 1;
+            padding: 10px;
+            background-color: var(--discord-darkest);
+            border: 1px solid var(--discord-darkest);
+            border-radius: 4px;
+            color: var(--discord-text);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .option-btn:hover {
+            border-color: var(--discord-blurple);
+        }
+        
+        .option-btn.active {
+            background-color: var(--discord-blurple);
+            border-color: var(--discord-blurple);
+        }
+        
+        .room-code-container {
+            margin-top: 15px;
+            display: none;
         }
         
         .welcome-title {
@@ -152,10 +188,16 @@
             font-weight: 600;
             cursor: pointer;
             transition: background-color 0.2s;
+            margin-top: 10px;
         }
         
         .join-btn:hover {
             background-color: #4752c4;
+        }
+        
+        .join-btn:disabled {
+            background-color: var(--discord-text-muted);
+            cursor: not-allowed;
         }
         
         /* Chat Interface */
@@ -545,14 +587,46 @@
             background-color: var(--discord-red);
             color: white;
         }
+        
+        .invite-section {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: var(--discord-darkest);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .invite-link {
+            display: flex;
+            margin-top: 8px;
+        }
+        
+        .invite-link input {
+            flex: 1;
+            padding: 5px;
+            background-color: var(--discord-darker);
+            border: 1px solid var(--discord-darkest);
+            border-radius: 3px;
+            color: var(--discord-text);
+        }
+        
+        .copy-btn {
+            padding: 5px 10px;
+            background-color: var(--discord-blurple);
+            color: white;
+            border: none;
+            border-radius: 3px;
+            margin-left: 5px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
     <!-- Welcome Screen -->
     <div class="welcome-screen" id="welcomeScreen">
         <div class="welcome-container">
-            <h1 class="welcome-title">Discord-Priv8 Chat</h1>
-            <p class="welcome-subtitle">Enter your username nigger</p>
+            <h1 class="welcome-title">Welcome to Discord-Style Chat</h1>
+            <p class="welcome-subtitle">Enter your username to get started</p>
             
             <div class="avatar-upload">
                 <div class="avatar-preview" id="avatarPreview">
@@ -567,7 +641,28 @@
                 <input type="text" class="form-input" id="usernameInput" placeholder="Enter your username" maxlength="32">
             </div>
             
-            <button class="join-btn" id="joinBtn">Join Chat</button>
+            <div class="connection-options">
+                <div class="form-label">Connection Type</div>
+                <div class="option-buttons">
+                    <button class="option-btn active" id="createRoomBtn">Create Room</button>
+                    <button class="option-btn" id="joinRoomBtn">Join Room</button>
+                </div>
+                
+                <div class="room-code-container" id="roomCodeContainer">
+                    <label class="form-label" for="roomCodeInput">Room Code</label>
+                    <input type="text" class="form-input" id="roomCodeInput" placeholder="Enter room code">
+                </div>
+            </div>
+            
+            <button class="join-btn" id="joinBtn">Create Room & Join Chat</button>
+            
+            <div class="invite-section hidden" id="inviteSection">
+                <div>Share this link with your friend:</div>
+                <div class="invite-link">
+                    <input type="text" id="inviteLink" readonly>
+                    <button class="copy-btn" id="copyBtn">Copy</button>
+                </div>
+            </div>
         </div>
     </div>
     
@@ -684,7 +779,7 @@
 
     <!-- Connection Status -->
     <div class="connection-status disconnected" id="connectionStatus">
-        Connecting...
+        Not Connected
     </div>
 
     <script>
@@ -697,6 +792,13 @@
         const avatarPreview = document.getElementById('avatarPreview');
         const avatarInitials = document.getElementById('avatarInitials');
         const joinBtn = document.getElementById('joinBtn');
+        const createRoomBtn = document.getElementById('createRoomBtn');
+        const joinRoomBtn = document.getElementById('joinRoomBtn');
+        const roomCodeContainer = document.getElementById('roomCodeContainer');
+        const roomCodeInput = document.getElementById('roomCodeInput');
+        const inviteSection = document.getElementById('inviteSection');
+        const inviteLink = document.getElementById('inviteLink');
+        const copyBtn = document.getElementById('copyBtn');
         const userAvatar = document.getElementById('userAvatar');
         const userAvatarInitials = document.getElementById('userAvatarInitials');
         const displayUsername = document.getElementById('displayUsername');
@@ -709,15 +811,20 @@
         
         // User data
         let userData = {
-            id: null,
+            id: generateId(),
             username: '',
             avatar: null,
-            tag: Math.floor(Math.random() * 10000).toString().padStart(4, '0')
+            tag: Math.floor(Math.random() * 10000).toString().padStart(4, '0'),
+            isHost: false
         };
         
-        // Socket.io connection (using a free public server for demo)
-        // In a real app, you'd use your own server
-        const socket = io('https://socketio-chat-h9jt.herokuapp.com/');
+        // Chat state
+        let chatState = {
+            roomId: null,
+            peers: {},
+            isConnected: false,
+            connectionType: 'create' // 'create' or 'join'
+        };
         
         // Event Listeners
         joinBtn.addEventListener('click', joinChat);
@@ -725,37 +832,27 @@
         avatarInput.addEventListener('change', handleAvatarUpload);
         usernameInput.addEventListener('input', updateAvatarPreview);
         messageInput.addEventListener('keypress', handleMessageSend);
-        
-        // Socket event listeners
-        socket.on('connect', () => {
-            connectionStatus.textContent = 'Connected';
-            connectionStatus.className = 'connection-status connected';
-        });
-        
-        socket.on('disconnect', () => {
-            connectionStatus.textContent = 'Disconnected';
-            connectionStatus.className = 'connection-status disconnected';
-        });
-        
-        socket.on('user joined', (data) => {
-            addSystemMessage(`${data.username} joined the chat`);
-            updateOnlineUsers(data.users);
-        });
-        
-        socket.on('user left', (data) => {
-            addSystemMessage(`${data.username} left the chat`);
-            updateOnlineUsers(data.users);
-        });
-        
-        socket.on('chat message', (data) => {
-            addMessage(data.user, data.message, data.timestamp, false);
-        });
-        
-        socket.on('users', (users) => {
-            updateOnlineUsers(users);
-        });
+        createRoomBtn.addEventListener('click', () => setConnectionType('create'));
+        joinRoomBtn.addEventListener('click', () => setConnectionType('join'));
+        copyBtn.addEventListener('click', copyInviteLink);
         
         // Functions
+        function setConnectionType(type) {
+            chatState.connectionType = type;
+            
+            if (type === 'create') {
+                createRoomBtn.classList.add('active');
+                joinRoomBtn.classList.remove('active');
+                roomCodeContainer.style.display = 'none';
+                joinBtn.textContent = 'Create Room & Join Chat';
+            } else {
+                createRoomBtn.classList.remove('active');
+                joinRoomBtn.classList.add('active');
+                roomCodeContainer.style.display = 'block';
+                joinBtn.textContent = 'Join Room';
+            }
+        }
+        
         function joinChat() {
             const username = usernameInput.value.trim();
             
@@ -775,19 +872,60 @@
                 userAvatar.innerHTML = `<img src="${userData.avatar}" alt="${username}">`;
             }
             
+            // Generate or use room code
+            if (chatState.connectionType === 'create') {
+                chatState.roomId = generateRoomCode();
+                userData.isHost = true;
+                
+                // Show invite section
+                inviteSection.classList.remove('hidden');
+                const currentUrl = window.location.href.split('?')[0];
+                inviteLink.value = `${currentUrl}?room=${chatState.roomId}`;
+            } else {
+                const roomCode = roomCodeInput.value.trim();
+                if (!roomCode) {
+                    alert('Please enter a room code');
+                    return;
+                }
+                chatState.roomId = roomCode;
+                userData.isHost = false;
+            }
+            
             // Switch to chat interface
             welcomeScreen.style.display = 'none';
             chatInterface.style.display = 'flex';
             
-            // Join the chat
-            socket.emit('add user', username);
+            // Update connection status
+            connectionStatus.textContent = 'Connected to Room: ' + chatState.roomId;
+            connectionStatus.className = 'connection-status connected';
+            chatState.isConnected = true;
             
             // Add welcome message
-            addSystemMessage(`Welcome to the chat, ${username}! Type a message to start chatting.`);
-            addSystemMessage(`There are ${socket.users ? Object.keys(socket.users).length : 1} users online.`);
+            addSystemMessage(`Welcome to the chat, ${username}!`);
+            addSystemMessage(`You've joined room: ${chatState.roomId}`);
+            
+            if (userData.isHost) {
+                addSystemMessage(`You are the room host. Share the invite link with friends!`);
+            }
+            
+            // Add yourself to members list
+            updateMembersList();
             
             // Focus on message input
             messageInput.focus();
+            
+            // Check if there's a room in URL (for joining via invite link)
+            checkUrlForRoom();
+        }
+        
+        function checkUrlForRoom() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const roomFromUrl = urlParams.get('room');
+            
+            if (roomFromUrl && !chatState.roomId) {
+                roomCodeInput.value = roomFromUrl;
+                setConnectionType('join');
+            }
         }
         
         function handleAvatarUpload(event) {
@@ -826,12 +964,20 @@
             // Add message to UI immediately
             addMessage(userData, text, timestamp, true);
             
-            // Send to server
-            socket.emit('chat message', {
-                user: userData,
-                message: text,
-                timestamp: timestamp
-            });
+            // In a real app, you would send to other peers here
+            // For this demo, we'll simulate receiving messages after a delay
+            if (Math.random() > 0.7) {
+                setTimeout(() => {
+                    const botResponse = generateBotResponse(text);
+                    const botUser = {
+                        id: 'bot',
+                        username: 'ChatBot',
+                        avatar: null,
+                        tag: '0000'
+                    };
+                    addMessage(botUser, botResponse, new Date().toISOString(), false);
+                }, 1000 + Math.random() * 2000);
+            }
         }
         
         function addMessage(user, text, timestamp, isOwnMessage) {
@@ -889,30 +1035,29 @@
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
         
-        function updateOnlineUsers(users) {
+        function updateMembersList() {
             membersList.innerHTML = '';
-            onlineCount.textContent = users ? Object.keys(users).length : 1;
             
-            if (users) {
-                Object.values(users).forEach(user => {
-                    const memberElement = document.createElement('div');
-                    memberElement.className = 'member-item';
-                    
-                    const avatarContent = user.avatar 
-                        ? `<img src="${user.avatar}" alt="${user.username}">`
-                        : `<span>${getInitials(user.username)}</span>`;
-                    
-                    memberElement.innerHTML = `
-                        <div class="online-indicator"></div>
-                        <div class="member-avatar" style="background-color: ${stringToColor(user.username)};">
-                            ${avatarContent}
-                        </div>
-                        <div class="member-name">${user.username}</div>
-                    `;
-                    
-                    membersList.appendChild(memberElement);
-                });
-            }
+            // Add yourself
+            const memberElement = document.createElement('div');
+            memberElement.className = 'member-item';
+            
+            const avatarContent = userData.avatar 
+                ? `<img src="${userData.avatar}" alt="${userData.username}">`
+                : `<span>${getInitials(userData.username)}</span>`;
+            
+            memberElement.innerHTML = `
+                <div class="online-indicator"></div>
+                <div class="member-avatar" style="background-color: ${stringToColor(userData.username)};">
+                    ${avatarContent}
+                </div>
+                <div class="member-name">${userData.username} ${userData.isHost ? '(Host)' : ''}</div>
+            `;
+            
+            membersList.appendChild(memberElement);
+            
+            // Update online count
+            onlineCount.textContent = '1';
         }
         
         function stringToColor(str) {
@@ -929,11 +1074,60 @@
             return colors[Math.abs(hash) % colors.length];
         }
         
+        function generateId() {
+            return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        }
+        
+        function generateRoomCode() {
+            return Math.random().toString(36).substring(2, 8).toUpperCase();
+        }
+        
+        function copyInviteLink() {
+            inviteLink.select();
+            document.execCommand('copy');
+            copyBtn.textContent = 'Copied!';
+            setTimeout(() => {
+                copyBtn.textContent = 'Copy';
+            }, 2000);
+        }
+        
+        function generateBotResponse(message) {
+            const responses = [
+                "That's interesting!",
+                "I see what you mean.",
+                "Tell me more about that.",
+                "How does that make you feel?",
+                "I'm here to chat with you!",
+                "That's a good point.",
+                "I understand what you're saying.",
+                "Let's keep the conversation going!",
+                "Thanks for sharing that.",
+                "I'm learning from our conversation."
+            ];
+            
+            const questions = [
+                "What do you think about this chat?",
+                "How's your day going?",
+                "Have you tried any new games lately?",
+                "What's your favorite programming language?",
+                "Do you have any projects you're working on?"
+            ];
+            
+            if (message.includes('?')) {
+                return questions[Math.floor(Math.random() * questions.length)];
+            }
+            
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+        
         // Initialize with a random username
         const randomNames = ['CyberHacker', 'CodeMaster', 'DigitalGhost', 'ByteWizard', 'DataDrifter'];
         const randomName = randomNames[Math.floor(Math.random() * randomNames.length)];
         usernameInput.value = randomName;
         updateAvatarPreview();
+        
+        // Check URL for room code on load
+        window.addEventListener('load', checkUrlForRoom);
     </script>
 </body>
 </html>
